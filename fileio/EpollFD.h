@@ -58,15 +58,12 @@ struct EpollFD : FD {
      * either EPOLLET or EPOLLONESHOT.
      */
     void addFD(int _fd, Func cb, unsigned int _flags = EPOLLIN|EPOLLET) {
-        {
-            std::lock_guard lock {mutex};
-            callbacks[_fd] = std::move(cb);
-        }
+        std::lock_guard lock {mutex};
+        callbacks[_fd] = std::move(cb);
         struct epoll_event event {};
         event.events = _flags;
         event.data.fd = _fd;
         if(::epoll_ctl(*this, EPOLL_CTL_ADD, _fd, &event) == -1) {
-            std::lock_guard lock {mutex};
             callbacks.erase(_fd);
             throw std::runtime_error("cannot call epoll_ctl EPOLL_CTL_ADD " + std::string(std::strerror(errno)));
         }
@@ -102,8 +99,7 @@ struct EpollFD : FD {
                 std::cout << " epoll_wait timeout occurs\n";
             }
         } else {
-            /* The return value EINTR is ignored, because it is not critical. This happens
-             * when a signal interrupts this thread, therefore this is not critical. */
+            /* when a signal interrupts this thread, EINTR returns. So ignore it. */
             if(errno != EINTR) {
                 std::cerr << "epoll_wait: "<< std::strerror(errno) << '\n';
             }
@@ -113,9 +109,26 @@ struct EpollFD : FD {
     }
 
     void dispatch(std::vector<struct epoll_event> const &events) {
-        for(auto const& event : events) {
-            /* call the callback :) */
-            callbacks[event.data.fd](event.events);
+        struct Wrapper {
+            Func cb;
+            struct epoll_event event;
+        };
+
+        std::vector<Wrapper> wrappers;
+
+        {
+            /* copy the callback handles as the callback map might be modified while accessing it */
+            std::shared_lock lock{mutex};
+            wrappers.reserve(events.size());
+            for(auto const& event : events) {
+                if(auto it = callbacks.find(event.data.fd); it !=callbacks.end()) {
+                    wrappers.emplace_back(Wrapper{callbacks[it->first], event});
+                }
+            }
+        }
+
+        for(auto const& wrapper : wrappers) {
+            wrapper.cb(wrapper.event.events);
         }
     }
 
@@ -124,7 +137,7 @@ struct EpollFD : FD {
     }
 
     /*
-     * Wakes up epoll_wait so that the associated thread have the chance to end gracefully. Call wakeup for every thread.
+     * wakes up epoll_wait for every thread, so that the associated thread have the chance to end gracefully.
      */
     void wakeup() {
         if(efd.valid()) {
@@ -171,8 +184,7 @@ struct EpollFD : FD {
 
 private:
     std::map<int, Func> callbacks;
-    std::mutex mutex;
-    std::mutex event_mutex;
+    std::shared_mutex mutex;
     EventFD efd{EFD_SEMAPHORE|EFD_NONBLOCK};
 };
 
