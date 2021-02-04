@@ -1,0 +1,39 @@
+TARGETS := example timer
+SRC := ../src
+
+SRCFILES := $(shell find $(SRC) -name "*.cpp" ! -path '*/examples/*' -printf "%f\n")
+OBJECTS  := $(SRCFILES:.cpp=.o)
+
+ALL_OBJ := $(OBJECTS) example.o timer.o
+DEPS := $(ALL_OBJ:.o=.d)
+
+INCDIR := $(shell find $(SRC) -type d)
+INCLUDES := $(addprefix -I,$(INCDIR))
+VPATH = $(INCDIR)
+
+CXX := g++
+CXXFLAGS = -std=c++17 $(INCLUDES) -MMD -MP
+CXXFLAGS += -Wall -Wextra -Wpedantic -Warray-bounds -Werror
+#CXXFLAGS +=  -Weffc++
+LDFLAGS :=
+LDLIBS := -lpthread
+
+.DELETE_ON_ERROR:
+all: $(TARGETS)
+
+example: $(OBJECTS) example.o
+timer: $(OBJECTS) timer.o
+
+$(TARGETS):
+	$(CXX) $(LDFLAGS) $^ -o $@ $(LDLIBS)
+
+#There is already an implicit rule for that:
+#%.o: %.cpp
+#	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+.PHONY: clean
+clean:
+	rm -rf *.o *.d $(TARGETS)
+
+-include $(DEPS)
+
