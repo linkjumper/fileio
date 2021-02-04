@@ -3,7 +3,15 @@
 C++ wrappers around unix file descriptors. The code is inspired by [simplyfile](https://github.com/gottliebtfreitag/simplyfile).
 
 
-## requirements
+## Requirements
 
 - C++17
 - pthread
+
+## How to build examples?
+
+```bash
+> bash ./build.sh
+> cd build
+> make
+```
