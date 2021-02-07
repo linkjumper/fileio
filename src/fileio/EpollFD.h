@@ -59,7 +59,7 @@ struct EpollFD : FD {
      */
     void addFD(int _fd, Func cb, unsigned int _flags = EPOLLIN|EPOLLET) {
         std::lock_guard lock {mutex};
-        callbacks[_fd] = std::move(cb);
+        callbacks[_fd] = std::make_shared<Func>(std::move(cb));
         struct epoll_event event {};
         event.events = _flags;
         event.data.fd = _fd;
@@ -110,7 +110,7 @@ struct EpollFD : FD {
 
     void dispatch(std::vector<struct epoll_event> const &events) {
         struct Wrapper {
-            Func cb;
+            std::shared_ptr<Func> cb;
             struct epoll_event event;
         };
 
@@ -128,7 +128,7 @@ struct EpollFD : FD {
         }
 
         for(auto const& wrapper : wrappers) {
-            wrapper.cb(wrapper.event.events);
+            (*wrapper.cb)(wrapper.event.events);
         }
     }
 
@@ -183,7 +183,7 @@ struct EpollFD : FD {
     }
 
 private:
-    std::map<int, Func> callbacks;
+    std::map<int, std::shared_ptr<Func>> callbacks;
     std::shared_mutex mutex;
     EventFD efd{EFD_SEMAPHORE|EFD_NONBLOCK};
 };
