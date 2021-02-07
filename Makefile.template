@@ -1,10 +1,10 @@
-TARGETS := example timer
+TARGETS := example timer pool
 SRC := ../src
 
 SRCFILES := $(shell find $(SRC) -name "*.cpp" ! -path '*/examples/*' -printf "%f\n")
 OBJECTS  := $(SRCFILES:.cpp=.o)
 
-ALL_OBJ := $(OBJECTS) example.o timer.o
+ALL_OBJ := $(OBJECTS) example.o timer.o pool.o
 DEPS := $(ALL_OBJ:.o=.d)
 
 INCDIR := $(shell find $(SRC) -type d)
@@ -23,6 +23,7 @@ all: $(TARGETS)
 
 example: $(OBJECTS) example.o
 timer: $(OBJECTS) timer.o
+pool: $(OBJECTS) pool.o
 
 $(TARGETS):
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LDLIBS)
