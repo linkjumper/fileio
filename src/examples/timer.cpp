@@ -5,6 +5,7 @@
 #include <chrono>
 #include <signal.h>
 #include <vector>
+#include <cstring>
 
 #include "fileio/EpollFD.h"
 #include "asyncio/AsyncIO.h"

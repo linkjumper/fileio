@@ -5,39 +5,16 @@
 namespace fileio {
 
 struct FD {
-    FD(int _fd = -1) : fd(_fd) {}
+    FD(int _fd = -1);
     FD(const FD &other) = delete;
     FD& operator=(const FD &other) = delete;
-    FD(FD &&other) noexcept {
-        fd = other.fd;
-        other.fd = -1;
-    }
-    FD& operator=(FD &&other) noexcept {
-        if (this != &other) {
-            fd = other.fd;
-            other.fd = -1;
-        }
-        return *this;
-    }
+    FD(FD &&other) noexcept;
+    FD& operator=(FD &&other) noexcept;
+    virtual ~FD();
 
-    virtual ~FD() {
-        close();
-    }
-
-    bool valid() const noexcept {
-        return fd >= 0;
-    }
-
-    void close() noexcept {
-        if (not valid()) {
-            ::close(*this);
-            fd = -1;
-        }
-    }
-
-    operator int() const noexcept {
-        return fd;
-    }
+    bool valid() const noexcept;
+    void close() noexcept;
+    operator int() const noexcept;
 
 private:
     int fd;

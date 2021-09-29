@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <signal.h>
+#include <cstring>
 
 #include "asyncio/AsyncIO.h"
 
