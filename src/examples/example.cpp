@@ -6,7 +6,7 @@
 
 #include "asyncio/AsyncIO.h"
 
-asyncio::AsyncIO loop {7};
+asyncio::AsyncIO loop;
 
 void sigfunc(int signum) {
     static bool signalHandledBefore {false};
