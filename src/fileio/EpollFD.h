@@ -25,7 +25,7 @@ struct EpollFD : FD {
     void addFD(int _fd, Func cb, unsigned int _flags = EPOLLIN|EPOLLET);
     void modFD(int _fd, int _flags = EPOLLIN|EPOLLET);
     void rmFD(int _fd) noexcept;
-    void printEvents(int events);
+    std::string getEventsStr(int events);
 
 protected:
     void work(int max_events = 1, int timeout_ms = -1);

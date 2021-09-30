@@ -3,8 +3,25 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <map>
+#include <sstream>
 
 namespace fileio {
+
+namespace detail {
+std::map<unsigned int, std::string> event2Str = {
+    {EPOLLIN, "EPOLLIN"},
+    {EPOLLPRI, "EPOLLPRI"},
+    {EPOLLOUT, "EPOLLOUT"},
+    {EPOLLET, "EPOLLET"},
+    {EPOLLHUP, "EPOLLHUP"},
+    {EPOLLRDHUP, "EPOLLRDHUP"},
+    {EPOLLERR, "EPOLLERR"},
+    {EPOLLONESHOT, "EPOLLONESHOT"},
+    {EPOLLWAKEUP, "EPOLLWAKEUP"},
+    {EPOLLEXCLUSIVE, "EPOLLEXCLUSIVE"},
+};
+}
 
 EpollFD::EpollFD() : FD(::epoll_create1(0)) {
     if (not valid()) {
@@ -133,41 +150,16 @@ void EpollFD::wakeup() {
     }
 }
 
-void EpollFD::printEvents(int events) {
-    std::cout << "events: " << std::hex << std::showbase << events << '\n';
-    if(events == 0) {
-        return;
+std::string EpollFD::getEventsStr(int events) {
+    std::stringstream ss;
+    ss << "Events: " << std::hex << std::showbase << events << '\n';
+    if(events != 0) {
+        for(auto const& [event, name] : detail::event2Str) {
+            if(events & event)
+                ss << "  " << name << "\n";
+        }
     }
-    if(events & EPOLLIN) {
-        std::cout << "  EPOLLIN\n";
-    }
-    if(events & EPOLLPRI) {
-        std::cout << "  EPOLLPRI\n";
-    }
-    if(events & EPOLLOUT) {
-        std::cout << "  EPOLLOUT\n";
-    }
-    if(events & EPOLLET) {
-        std::cout << "  EPOLLET\n";
-    }
-    if(events & EPOLLHUP) {
-        std::cout << "  EPOLLHUP\n";
-    }
-    if(events & EPOLLRDHUP) {
-        std::cout << "  EPOLLRDHUP\n";
-    }
-    if(events & EPOLLERR) {
-        std::cout << "  EPOLLERR\n";
-    }
-    if(events & EPOLLONESHOT) {
-        std::cout << "  EPOLLONESHOT\n";
-    }
-    if(events & EPOLLWAKEUP) {
-        std::cout << "  EPOLLWAKEUP\n";
-    }
-    if(events & EPOLLEXCLUSIVE) {
-        std::cout << "  EPOLLEXCLUSIVE\n";
-    }
+    return ss.str();
 }
 
 }
