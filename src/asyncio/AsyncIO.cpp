@@ -30,14 +30,22 @@ void AsyncIO::stop() {
     }
 }
 
-void AsyncIO::workOneJobLoop() {
+void AsyncIO::workLoop(int nr_of_jobs) {
     while(run) {
         try {
-            work(1);
+            work(nr_of_jobs);
         } catch(std::exception const &e) {
             std::cerr << e.what();
         }
     }
+}
+
+void AsyncIO::workOneJobLoop() {
+    workLoop(1);
+}
+
+bool AsyncIO::isTerminated() {
+    return not run;
 }
 
 }
