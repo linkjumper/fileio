@@ -8,12 +8,14 @@
 #include <functional>
 #include <condition_variable>
 #include <atomic>
+#include <utility>
 
-ThreadPool::ThreadPool(int num_threads) {
-    for(int i{0}; i<num_threads; ++i) {
+ThreadPool::ThreadPool(unsigned int num_threads) {
+    for(unsigned int i{0}; i<num_threads; ++i) {
         threads.emplace_back(std::thread([&]{
             while(run) {
                 std::shared_ptr<Func> f = nullptr;
+                int arg;
                 {
                     std::unique_lock<std::mutex> lock {mutex};
                     while(tasks.empty() and run) {
@@ -25,10 +27,12 @@ ThreadPool::ThreadPool(int num_threads) {
                         return;
                     }
 
-                    f = tasks.front();
+                    auto t = tasks.front();
                     tasks.pop();
+                    f = t.first;
+                    arg = t.second;
                 }
-                (*f)();
+                (*f)(arg);
             }
         }));
     }
@@ -46,14 +50,14 @@ ThreadPool::~ThreadPool() {
     }
 }
 
-void ThreadPool::enqueue(std::shared_ptr<Func> f) {
+void ThreadPool::enqueue(std::shared_ptr<Func> f, int arg) {
     if(not run) {
         return;
     }
 
     {
         std::lock_guard<std::mutex> lock {mutex};
-        tasks.emplace(f);
+        tasks.emplace(std::make_pair(f, arg));
         new_data = true;
     }
     cv.notify_one();

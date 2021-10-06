@@ -10,12 +10,12 @@
 
 
 struct ThreadPool {
-    using Func = std::function<void()>;
+    using Func = std::function<void(int)>;
 
-    ThreadPool(int num_threads);
+    ThreadPool(unsigned int num_threads);
     ~ThreadPool();
 
-    void enqueue(std::shared_ptr<Func> f);
+    void enqueue(std::shared_ptr<Func> f, int arg);
     void stop();
 
 private:
@@ -23,7 +23,7 @@ private:
     std::atomic<bool> run{true};
     std::vector<std::thread> threads;
     std::mutex mutex;
-    std::queue<std::shared_ptr<Func>> tasks;
+    std::queue<std::pair<std::shared_ptr<Func>, int>> tasks;
     std::condition_variable cv;
     bool new_data{false};
 };
