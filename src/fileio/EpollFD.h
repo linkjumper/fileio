@@ -20,7 +20,7 @@ struct EpollFD : FD {
     EpollFD& operator=(EpollFD &other) = delete;
     EpollFD(EpollFD &&other) noexcept;
     EpollFD& operator=(EpollFD &&other) noexcept;
-    ~EpollFD();
+    virtual ~EpollFD();
 
     void addFD(int _fd, Func cb, unsigned int _flags = EPOLLIN|EPOLLET);
     void modFD(int _fd, int _flags = EPOLLIN|EPOLLET);
@@ -30,13 +30,13 @@ struct EpollFD : FD {
 protected:
     void work(int max_events = 1, int timeout_ms = -1);
     void wakeup();
-
-private:
     std::vector<struct epoll_event> wait(int max_events = 32, int timeout_ms = -1);
-    void dispatch(std::vector<struct epoll_event> const &events);
+    virtual void dispatch(std::vector<struct epoll_event> const &events);
 
     std::map<int, std::shared_ptr<Func>> callbacks;
     std::shared_mutex mutex;
+private:
+
     EventFD efd{EFD_SEMAPHORE|EFD_NONBLOCK};
 };
 

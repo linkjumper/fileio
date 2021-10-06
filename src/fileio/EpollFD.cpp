@@ -32,7 +32,7 @@ EpollFD::EpollFD() : FD(::epoll_create1(0)) {
         throw std::runtime_error("can not create eventfd");
     } else {
         /* Level triggered does not work for eventfd. Eventfds are always behave as EPOLLET, also EPOLLEXCLUSIVE is set implicit.
-            * See https://stackoverflow.com/questions/62231433/how-to-use-an-eventfd-with-level-triggered-behaviour-on-epoll */
+         * See https://stackoverflow.com/questions/62231433/how-to-use-an-eventfd-with-level-triggered-behaviour-on-epoll */
         addFD(efd, [&](auto) {
             efd.get();
         }, EPOLLIN);
@@ -79,7 +79,7 @@ void EpollFD::modFD(int _fd, int _flags) {
     event.events = _flags;
     event.data.fd = _fd;
     if (::epoll_ctl(*this, EPOLL_CTL_MOD, _fd, &event) == -1) {
-        throw std::runtime_error("cannot call epoll_ctl EPOLL_CTL_MOD " + std::string(std::strerror(errno)));
+        std::cerr << "cannot call epoll_ctl EPOLL_CTL_MOD " << std::strerror(errno) << '\n';
     }
 }
 
