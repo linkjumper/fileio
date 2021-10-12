@@ -34,7 +34,6 @@ private:
 
 private:
     std::unique_ptr<ThreadPool> pool{nullptr};
-    unsigned int jobs_per_event;
 };
 
 }

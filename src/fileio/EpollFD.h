@@ -33,8 +33,8 @@ protected:
     std::vector<struct epoll_event> wait(int max_events = 32, int timeout_ms = -1);
     virtual void dispatch(std::vector<struct epoll_event> const &events);
 
-    std::map<int, std::shared_ptr<Func>> callbacks;
-    std::shared_mutex mutex;
+    std::map<int, std::shared_ptr<Func>> callbacks {};
+    std::shared_mutex mutex {};
 private:
 
     EventFD efd{EFD_SEMAPHORE|EFD_NONBLOCK};

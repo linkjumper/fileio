@@ -21,9 +21,9 @@ struct ThreadPool {
 private:
     /* in a real world application use run with load()/ store() std::memory_order_relaxed */
     std::atomic<bool> run{true};
-    std::vector<std::thread> threads;
-    std::mutex mutex;
-    std::queue<std::pair<std::shared_ptr<Func>, int>> tasks;
-    std::condition_variable cv;
+    std::vector<std::thread> threads {};
+    std::mutex mutex {};
+    std::queue<std::pair<std::shared_ptr<Func>, int>> tasks {};
+    std::condition_variable cv {};
     bool new_data{false};
-};
+}; 

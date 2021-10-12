@@ -42,7 +42,7 @@ struct AsyncIO : fileio::EpollFD {
     bool isTerminated();
 
 protected:
-    std::vector<std::thread> threads;
+    std::vector<std::thread> threads {};
     std::atomic<bool> run{true};
 };
 

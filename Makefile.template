@@ -8,7 +8,7 @@ COMMON_OBJECTS = AsyncIO.o TimerFD.o EventFD.o FD.o EpollFD.o
 CXX := g++
 CXXFLAGS = -std=c++17 $(INCLUDES) -MMD -MP -g
 CXXFLAGS += -Wall -Wextra -Wpedantic -Warray-bounds -Werror
-#CXXFLAGS +=  -Weffc++
+CXXFLAGS +=  -Weffc++
 LDFLAGS :=
 LDLIBS := -lpthread
 

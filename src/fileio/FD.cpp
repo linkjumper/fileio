@@ -5,8 +5,7 @@ namespace fileio {
 
 FD::FD(int _fd) : fd(_fd) {}
 
-FD::FD(FD &&other) noexcept {
-    fd = other.fd;
+FD::FD(FD &&other) noexcept : fd(other.fd) {
     other.fd = -1;
 }
 FD& FD::operator=(FD &&other) noexcept {
