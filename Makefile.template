@@ -1,15 +1,9 @@
 TARGETS := example timer pool
 SRC := ../src
-
-SRCFILES := $(shell find $(SRC) -name "*.cpp" ! -path '*/examples/*' -printf "%f\n")
-OBJECTS  := $(SRCFILES:.cpp=.o)
-
-ALL_OBJ := $(OBJECTS) example.o timer.o pool.o
-DEPS := $(ALL_OBJ:.o=.d)
-
 INCDIR := $(shell find $(SRC) -type d)
 INCLUDES := $(addprefix -I,$(INCDIR))
 VPATH = $(INCDIR)
+COMMON_OBJECTS = AsyncIO.o TimerFD.o EventFD.o FD.o EpollFD.o
 
 CXX := g++
 CXXFLAGS = -std=c++17 $(INCLUDES) -MMD -MP -g
@@ -21,9 +15,9 @@ LDLIBS := -lpthread
 .DELETE_ON_ERROR:
 all: $(TARGETS)
 
-example: $(OBJECTS) example.o
-timer: $(OBJECTS) timer.o
-pool: $(OBJECTS) pool.o
+example: $(COMMON_OBJECTS) example.o
+timer: $(COMMON_OBJECTS) timer.o
+pool: $(COMMON_OBJECTS) LoadBalancer.o ThreadPool.o pool.o
 
 $(TARGETS):
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LDLIBS)
@@ -35,6 +29,4 @@ $(TARGETS):
 .PHONY: clean
 clean:
 	rm -rf *.o *.d $(TARGETS)
-
--include $(DEPS)
 
